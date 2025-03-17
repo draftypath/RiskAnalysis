@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRYPTORISKHUB | SCANBOT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Courier New", Courier, monospace;
+            background: #000000;
+            color: #cccccc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+        }
+
+        h1 {
+            font-size: 1.2em;
+            color: #cccccc;
+            text-align: left;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            border-bottom: 1px dashed #333;
+            padding-bottom: 5px;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 5px;
+            max-width: 600px;
+            margin: 0 auto 10px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            min-width: 200px;
+            padding: 5px;
+            font-size: 1em;
+            font-family: "Courier New", Courier, monospace;
+            background: #000000;
+            color: #cccccc;
+            border: 1px solid #333;
+            outline: none;
+        }
+
+        button {
+            padding: 5px 10px;
+            font-size: 1em;
+            font-family: "Courier New", Courier, monospace;
+            background: #000000;
+            color: #cccccc;
+            border: 1px solid #333;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        #result {
+            max-width: 600px;
+            margin: 0 auto;
+            flex: 1;
+            display: none;
+            flex-direction: column;
+        }
+
+        .header {
+            margin-bottom: 10px;
+        }
+
+        .header h3 {
+            font-size: 1em;
+            color: #cccccc;
+            text-transform: uppercase;
+        }
+
+        .header small {
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        .benchmarks {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .benchmark-card {
+            padding: 5px;
+            border-bottom: 1px dashed #333;
+        }
+
+        .benchmark-card strong {
+            font-size: 0.9em;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .benchmark-card p {
+            margin-top: 2px;
+            font-size: 0.9em;
+            color: #cccccc;
+        }
+
+        .risk-level {
+            text-align: left;
+            padding: 5px;
+            font-size: 1em;
+            border-top: 1px dashed #333;
+            border-bottom: 1px dashed #333;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .risk-low { color: #cccccc; }
+        .risk-moderate { color: #999; }
+        .risk-high { color: #666; }
+
+        .chart-container {
+            margin: 10px 0;
+            margin-bottom: 20px; /* Added margin to prevent overlap with chat */
+            border: 1px dashed #333;
+            position: relative;
+            height: 400px;
+        }
+
+        .chart-label {
+            font-size: 1em;
+            color: #cccccc;
+            padding: 5px;
+            text-transform: uppercase;
+        }
+
+        canvas {
+            background: #000000;
+            width: 100%;
+            height: 100%;
+        }
+
+        .chat-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-top: 1px dashed #333;
+            padding-top: 10px;
+        }
+
+        .chat-header {
+            font-size: 1em;
+            color: #cccccc;
+            text-align: left;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 5px;
+            margin-bottom: 5px;
+        }
+
+        .chat-message {
+            margin: 5px 0;
+            padding: 5px;
+            font-size: 1em;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .chat-message.user {
+            color: #cccccc;
+            margin-left: 10%;
+            border-left: 2px solid #333;
+            padding-left: 10px;
+        }
+
+        .chat-message.ai {
+            color: #999;
+            margin-right: 10%;
+            border-right: 2px solid #333;
+            padding-right: 10px;
+        }
+
+        .chat-message.divider {
+            color: #666;
+            text-align: center;
+            border-top: 1px dashed #333;
+            border-bottom: 1px dashed #333;
+            padding: 5px 0;
+            margin: 10px 0;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 5px;
+            padding: 5px 0;
+            border-top: 1px dashed #333;
+            background: #000000;
+            position: sticky;
+            bottom: 0;
+        }
+
+        #chat-input {
+            flex: 1;
+            padding: 5px;
+            font-size: 1em;
+            font-family: "Courier New", Courier, monospace;
+            background: #000000;
+            color: #cccccc;
+            border: 1px solid #333;
+            outline: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: left;
+            font-size: 1em;
+            color: #666;
+            padding: 5px;
+        }
+
+        .status-bar {
+            text-align: left;
+            margin-top: 10px;
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1em;
+            background: #666;
+            animation: blink 0.8s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1em; }
+            input[type="text"], button, #chat-input { font-size: 0.9em; padding: 4px; }
+            .benchmark-card { padding: 4px; }
+            .chat-header { font-size: 0.9em; }
+            .risk-level { font-size: 0.9em; }
+        }
+    </style>
+</head>
+<body>
+    <h1>CRYPTORISKHUB | SCANBOT</h1>
+    <div class="input-container">
+        <input type="text" id="contractAddress" value="H4phNbsqjV5rqk8u6FUACTLB6rNZRTAPGnBb8KXJpump" placeholder="> ENTER TOKEN ADDRESS">
+        <button onclick="analyzeCrypto()">SCAN</button>
+    </div>
+    <div class="loading" id="loading">SCANNING...<span class="cursor"></span></div>
+    <div id="result">
+        <div class="header"></div>
+        <div class="benchmarks"></div>
+        <div class="risk-level"></div>
+        <div class="chart-container" id="chart-container" style="display: none;">
+            <div class="chart-label" id="chart-label"></div>
+            <canvas id="price-chart"></canvas>
+        </div>
+        <div class="chat-section">
+            <div class="chat-header">CHAT WITH SCANBOT</div>
+            <div class="chat-box" id="chat-box">
+                <div class="chat-message ai">> I’M SCANBOT. RUN A SCAN, AND I’LL HELP YOU ANALYZE THE RESULTS!</div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chat-input" placeholder="> ASK ME ABOUT THE COIN...">
+                <button onclick="sendChatMessage()">SEND</button>
+            </div>
+        </div>
+    </div>
+    <div class="status-bar" id="status">[READY]<span class="cursor"></span></div>
+
+    <!-- Include Chart.js and Date Adapter -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script>
+        let latestAnalysis = null;
+        let priceChart = null;
+
+        // Utility Functions
+        function updateStatus(message) {
+            document.getElementById("status").innerHTML = `${message}<span class="cursor"></span>`;
+            console.log(`Status: ${message}`);
+        }
+
+        function showLoading(show) {
+            document.getElementById("loading").style.display = show ? "block" : "none";
+            document.getElementById("result").style.display = show ? "none" : "block";
+        }
+
+        function addChatMessage(message, isUser = false, isDivider = false) {
+            const chatBox = document.getElementById("chat-box");
+            const messageDiv = document.createElement("div");
+            messageDiv.className = `chat-message ${isUser ? "user" : isDivider ? "divider" : "ai"}`;
+            messageDiv.textContent = message;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // API Functions (DexScreener)
+        async function getPairFromToken(tokenAddress) {
+            const url = `https://api.dexscreener.com/latest/dex/tokens/${tokenAddress}`;
+            updateStatus(`[FETCHING] Checking token ${tokenAddress.slice(0, 6)}...`);
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const data = await response.json();
+                if (!data.pairs || data.pairs.length === 0) throw new Error("No pairs found");
+                const topPair = data.pairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
+                updateStatus(`[SUCCESS] Found pair for ${tokenAddress.slice(0, 6)}...`);
+                return {
+                    pairAddress: topPair.pairAddress,
+                    chainId: topPair.chainId,
+                    tokenName: topPair.baseToken.name,
+                    tokenSymbol: topPair.baseToken.symbol,
+                    quoteSymbol: topPair.quoteToken.symbol
+                };
+            } catch (error) {
+                updateStatus(`[ERROR] DEXSCREENER: ${error.message}`);
+                addChatMessage(`> [AI] ERROR: ${error.message}`);
+                return null;
+            }
+        }
+
+        async function fetchCryptoData(pairAddress, chainId) {
+            const url = `https://api.dexscreener.com/latest/dex/pairs/${chainId}/${pairAddress}`;
+            updateStatus(`[FETCHING] Loading data for pair ${pairAddress.slice(0, 6)}...`);
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const data = await response.json();
+                const pair = data.pair;
+                updateStatus(`[SUCCESS] Data loaded for ${pairAddress.slice(0, 6)}...`);
+                return {
+                    liquidity: pair.liquidity?.usd || 0,
+                    volume24h: pair.volume?.h24 || 0,
+                    creationTime: pair.pairCreatedAt,
+                    priceChange24h: pair.priceChange?.h24 || 0,
+                    priceUsd: pair.priceUsd || "0",
+                    fdv: pair.fdv || 0,
+                    txns24h: pair.txns?.h24 || { buys: 0, sells: 0 }
+                };
+            } catch (error) {
+                updateStatus(`[ERROR] PAIR DATA: ${error.message}`);
+                addChatMessage(`> [AI] ERROR: Failed to fetch pair data - ${error.message}`);
+                return null;
+            }
+        }
+
+        // Mock AI Logic to Generate Summary
+        function generateSummary(pairInfo, data, riskScore) {
+            const ageInDays = data.creationTime ? Math.floor((Date.now() - new Date(data.creationTime).getTime()) / (1000 * 60 * 60 * 24)) : 0;
+            let summary = `> SUMMARY FOR ${pairInfo.tokenName} (${pairInfo.tokenSymbol}):\n`;
+            summary += `> LIQUIDITY: $${data.liquidity.toLocaleString()} (${data.liquidity < 50000 ? "VERY LOW, HIGH RISK" : data.liquidity < 500000 ? "MODERATE, SOME RISK" : "HIGH, LOW RISK"})\n`;
+            summary += `> 24H VOLUME: $${data.volume24h.toLocaleString()} (${data.volume24h < 25000 ? "VERY LOW, CONCERNING" : data.volume24h < 250000 ? "MODERATE, COULD BE BETTER" : "HIGH, GOOD ACTIVITY"})\n`;
+            summary += `> PAIR AGE: ${ageInDays} DAYS (${ageInDays < 30 ? "VERY NEW, HIGHER RISK" : ageInDays < 90 ? "FAIRLY NEW, MODERATE RISK" : "ESTABLISHED, LOWER RISK"})\n`;
+            summary += `> RISK SCORE: ${riskScore}/100 (${riskScore >= 70 ? "HIGH RISK" : riskScore >= 40 ? "MODERATE RISK" : "LOW RISK"}).`;
+            return summary;
+        }
+
+        // Mock AI Logic to Respond to Chat
+        function respondToChat(message, pairInfo, data, riskScore) {
+            const ageInDays = data.creationTime ? Math.floor((Date.now() - new Date(data.creationTime).getTime()) / (1000 * 60 * 60 * 24)) : 0;
+            const msg = message.toLowerCase().trim();
+
+            if (msg === "hi" || msg === "hey" || msg === "hello") {
+                return `> GREETINGS! I HAVE DATA ON ${pairInfo.tokenName} (${pairInfo.tokenSymbol}). RISK SCORE: ${riskScore}/100. WHAT DO YOU WANT TO KNOW?`;
+            }
+
+            if (msg.includes("risk") || msg.includes("safe")) {
+                return `> RISK ANALYSIS FOR ${pairInfo.tokenName}: ${riskScore}/100 (${riskScore >= 70 ? "HIGH RISK" : riskScore >= 40 ? "MODERATE RISK" : "LOW RISK"}). LIQUIDITY IS ${data.liquidity < 50000 ? "VERY LOW" : "DECENT"}, AND THE PAIR IS ${ageInDays < 30 ? "VERY NEW" : "ESTABLISHED"}.`;
+            }
+
+            if (msg.includes("liquidity")) {
+                return `> LIQUIDITY FOR ${pairInfo.tokenName}: $${data.liquidity.toLocaleString()}. THAT’S ${data.liquidity < 50000 ? "VERY LOW, INCREASING RISK" : data.liquidity < 500000 ? "MODERATE, SOMEWHAT STABLE" : "HIGH, GOOD FOR TRADING"}.`;
+            }
+
+            if (msg.includes("volume")) {
+                return `> 24H VOLUME FOR ${pairInfo.tokenName}: $${data.volume24h.toLocaleString()}. THAT’S ${data.volume24h < 25000 ? "VERY LOW, LOW ACTIVITY" : data.volume24h < 250000 ? "MODERATE, COULD BE BETTER" : "HIGH, STRONG ACTIVITY"}.`;
+            }
+
+            if (msg.includes("age") || msg.includes("old")) {
+                return `> ${pairInfo.tokenName} IS ${ageInDays} DAYS OLD. IT’S ${ageInDays < 30 ? "VERY NEW, RISKIER" : ageInDays < 90 ? "FAIRLY NEW, STILL MATURING" : "WELL-ESTABLISHED, SAFER"}.`;
+            }
+
+            if (msg.includes("price") || msg.includes("change")) {
+                return `> 24H PRICE CHANGE FOR ${pairInfo.tokenName}: ${data.priceChange24h.toFixed(2)}%. THAT’S A ${Math.abs(data.priceChange24h) > 25 ? "HIGHLY VOLATILE MOVE" : Math.abs(data.priceChange24h) > 10 ? "MODERATE CHANGE" : "STABLE MOVEMENT"}.`;
+            }
+
+            if (msg.includes("fdv") || msg.includes("valuation")) {
+                return `> FULLY DILUTED VALUATION (FDV) OF ${pairInfo.tokenName}: $${(data.fdv / 1000000).toFixed(2)}M. THAT’S ${data.fdv > 5000000000 ? "VERY HIGH, POSSIBLE OVERVALUATION" : data.fdv > 1000000000 ? "HIGH, MONITOR CLOSELY" : "REASONABLE"}.`;
+            }
+
+            if (msg.includes("transaction") || msg.includes("tx")) {
+                return `> LAST 24H FOR ${pairInfo.tokenName}: ${data.txns24h.buys} BUYS, ${data.txns24h.sells} SELLS. BUY/SELL RATIO: ${(data.txns24h.buys / (data.txns24h.sells || 1)).toFixed(2)} (${data.txns24h.buys / (data.txns24h.sells || 1) < 0.5 || data.txns24h.buys / (data.txns24h.sells || 1) > 3 ? "UNBALANCED, POTENTIAL RISK" : "BALANCED, STABLE"}).`;
+            }
+
+            const rugRisk = data.liquidity < 10000 || ageInDays < 7 ? "HIGH" : "LOW";
+            if (msg.includes("rug") || msg.includes("scam")) {
+                return `> RUG PULL RISK FOR ${pairInfo.tokenName}: ${rugRisk}. LIQUIDITY IS ${data.liquidity < 10000 ? "VERY LOW" : "SUFFICIENT"}, AND IT’S ${ageInDays < 7 ? "VERY NEW" : "OLDER"}.`;
+            }
+
+            if (msg.includes("summary") || msg.includes("overview")) {
+                return generateSummary(pairInfo, data, riskScore);
+            }
+
+            return `> I’M NOT SURE ABOUT "${message}". I CAN TELL YOU ABOUT ${pairInfo.tokenName}’S LIQUIDITY ($${data.liquidity.toLocaleString()}), VOLUME ($${data.volume24h.toLocaleString()}), OR RISK SCORE (${riskScore}/100). WHAT WOULD YOU LIKE TO KNOW?`;
+        }
+
+        // Main Analysis Function with Chart.js
+        async function analyzeCrypto(fromChat = false) {
+            const contractAddressInput = document.getElementById("contractAddress");
+            const contractAddress = contractAddressInput.value.trim();
+            const resultDiv = document.getElementById("result");
+            const headerDiv = resultDiv.querySelector(".header");
+            const benchmarksDiv = resultDiv.querySelector(".benchmarks");
+            const riskLevelDiv = resultDiv.querySelector(".risk-level");
+            const chartContainer = document.getElementById("chart-container");
+            const chartLabel = document.getElementById("chart-label");
+            const chartCanvas = document.getElementById("price-chart");
+            const chatBox = document.getElementById("chat-box");
+
+            updateStatus("[PROCESSING] SCANNING TOKEN...");
+            showLoading(true);
+            if (priceChart) priceChart.destroy();
+
+            try {
+                if (!contractAddress) {
+                    throw new Error("NO ADDRESS ENTERED");
+                }
+
+                const pairInfo = await getPairFromToken(contractAddress);
+                if (!pairInfo) {
+                    throw new Error("NO TRADING PAIRS FOUND");
+                }
+
+                const data = await fetchCryptoData(pairInfo.pairAddress, pairInfo.chainId);
+                if (!data) {
+                    throw new Error("DATA FETCH FAILED");
+                }
+
+                let riskScore = 0;
+                headerDiv.innerHTML = `
+                    <h3>${pairInfo.tokenName} (${pairInfo.tokenSymbol})</h3>
+                    <small>ADDRESS: ${contractAddress.slice(0, 6)}...${contractAddress.slice(-4)} | PAIR: ${pairInfo.pairAddress.slice(0, 6)}...${pairInfo.pairAddress.slice(-4)} [${pairInfo.chainId}]</small>
+                `;
+                benchmarksDiv.innerHTML = "";
+
+                if (data.liquidity < 50000) riskScore += 20;
+                else if (data.liquidity < 500000) riskScore += 10;
+                benchmarksDiv.innerHTML += `
+                    <div class="benchmark-card">
+                        <strong>LIQUIDITY</strong>
+                        <p>$${data.liquidity.toLocaleString()}</p>
+                    </div>
+                `;
+
+                if (data.volume24h < 25000) riskScore += 20;
+                else if (data.volume24h < 250000) riskScore += 10;
+                benchmarksDiv.innerHTML += `
+                    <div class="benchmark-card">
+                        <strong>24H VOLUME</strong>
+                        <p>$${data.volume24h.toLocaleString()}</p>
+                    </div>
+                `;
+
+                const ageInDays = data.creationTime ? Math.floor((Date.now() - new Date(data.creationTime).getTime()) / (1000 * 60 * 60 * 24)) : 0;
+                if (ageInDays < 30) riskScore += 15;
+                else if (ageInDays < 90) riskScore += 7;
+                benchmarksDiv.innerHTML += `
+                    <div class="benchmark-card">
+                        <strong>PAIR AGE</strong>
+                        <p>${ageInDays} DAYS</p>
+                    </div>
+                `;
+
+                const absPriceChange = Math.abs(data.priceChange24h);
+                if (absPriceChange > 25) riskScore += 20;
+                else if (absPriceChange > 10) riskScore += 10;
+                benchmarksDiv.innerHTML += `
+                    <div class="benchmark-card">
+                        <strong>PRICE CHANGE (24H)</strong>
+                        <p>${data.priceChange24h.toFixed(2)}%</p>
+                    </div>
+                `;
+
+                const volToLiquidity = data.liquidity > 0 ? data.volume24h / data.liquidity : 0;
+                if (volToLiquidity > 2) riskScore += 15;
+                else if (volToLiquidity > 0.75) riskScore += 7;
+                benchmarksDiv.innerHTML += `
+                    <div class="benchmark-card">
+                        <strong>VOL/LIQ RATIO</strong>
+                        <p>${volToLiquidity.toFixed(2)}</p>
+                    </div>
+                `;
+
+                if (data.fdv > 5000000000) riskScore += 10;
+                else if (data.fdv > 1000000000) riskScore += 5;
+                benchmarksDiv.innerHTML += `
+                    <div class="benchmark-card">
+                        <strong>FDV</strong>
+                        <p>$${(data.fdv / 1000000).toFixed(2)}M</p>
+                    </div>
+                `;
+
+                const txRatio = data.txns24h.buys / (data.txns24h.sells || 1);
+                if (txRatio < 0.5 || txRatio > 3) riskScore += 15;
+                benchmarksDiv.innerHTML += `
+                    <div class="benchmark-card">
+                        <strong>24H TRANSACTIONS</strong>
+                        <p>BUYS: ${data.txns24h.buys} | SELLS: ${data.txns24h.sells}</p>
+                    </div>
+                `;
+
+                const rugRisk = data.liquidity < 10000 || ageInDays < 7 ? "HIGH" : "LOW";
+                if (rugRisk === "HIGH") riskScore += 25;
+                benchmarksDiv.innerHTML += `
+                    <div class="benchmark-card">
+                        <strong>RUG PULL RISK</strong>
+                        <p>${rugRisk}</p>
+                    </div>
+                `;
+
+                const riskLevel = riskScore >= 70 ? "HIGH RISK" : riskScore >= 40 ? "MODERATE RISK" : "LOW RISK";
+                const riskClass = riskScore >= 70 ? "risk-high" : riskScore >= 40 ? "risk-moderate" : "risk-low";
+                riskLevelDiv.innerHTML = `RISK SCORE: ${riskScore}/100 [${riskLevel}]<span class="cursor"></span>`;
+                riskLevelDiv.className = `risk-level ${riskClass}`;
+
+                // Set latestAnalysis
+                latestAnalysis = { pairInfo, data, riskScore };
+
+                // Generate Chart with Chart.js
+                chartLabel.textContent = `> PRICE CHART [${pairInfo.tokenSymbol}/${pairInfo.quoteSymbol}]`;
+                updateStatus("[RENDERING] Generating chart...");
+
+                const historicalPrices = [];
+                const days = 7;
+                const basePrice = parseFloat(data.priceUsd) || 0.01;
+                for (let i = 0; i < days; i++) {
+                    const priceChange = basePrice * (1 + (Math.random() - 0.5) * 0.1);
+                    historicalPrices.push({
+                        x: new Date(Date.now() - (days - i) * 24 * 60 * 60 * 1000),
+                        y: priceChange
+                    });
+                }
+
+                try {
+                    priceChart = new Chart(chartCanvas, {
+                        type: 'line',
+                        data: {
+                            datasets: [{
+                                label: `${pairInfo.tokenSymbol}/${pairInfo.quoteSymbol} Price`,
+                                data: historicalPrices,
+                                borderColor: '#cccccc',
+                                backgroundColor: 'rgba(204, 204, 204, 0.2)',
+                                fill: true,
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    type: 'time',
+                                    time: {
+                                        unit: 'day',
+                                        tooltipFormat: 'MMM dd'
+                                    },
+                                    title: {
+                                        display: false
+                                    },
+                                    ticks: {
+                                        color: '#cccccc'
+                                    },
+                                    grid: {
+                                        color: '#333'
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: false
+                                    },
+                                    ticks: {
+                                        color: '#cccccc'
+                                    },
+                                    grid: {
+                                        color: '#333'
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+                    chartContainer.style.display = "block";
+                    updateStatus("[SUCCESS] Chart rendered");
+                } catch (chartError) {
+                    updateStatus(`[ERROR] CHART RENDER: ${chartError.message}`);
+                    chartLabel.textContent = `> PRICE CHART [${pairInfo.tokenSymbol}/${pairInfo.quoteSymbol}] [ERROR: FAILED TO RENDER]`;
+                    chartContainer.style.display = "block";
+                }
+
+                // Append summary to chat instead of clearing
+                const summary = generateSummary(pairInfo, data, riskScore);
+                if (fromChat) {
+                    addChatMessage("----- NEW ANALYSIS -----", false, true);
+                } else {
+                    chatBox.innerHTML = "";
+                }
+                addChatMessage(summary);
+                resultDiv.style.display = "flex";
+                showLoading(false);
+                updateStatus("[DONE] SCAN COMPLETED");
+            } catch (error) {
+                headerDiv.innerHTML = `<p style='color: #666;'>[ERROR] ${error.message}</p>`;
+                benchmarksDiv.innerHTML = "";
+                riskLevelDiv.innerHTML = "";
+                chartLabel.textContent = "";
+                chartContainer.style.display = "none";
+                addChatMessage(`> [AI] ERROR: ${error.message}`);
+                latestAnalysis = null;
+                showLoading(false);
+                updateStatus(`[ERROR] ${error.message}`);
+            }
+        }
+
+        // Chat Interaction with CA Detection
+        function sendChatMessage() {
+            const chatInput = document.getElementById("chat-input");
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            addChatMessage(`> ${message}`, true);
+
+            // Detect if the message contains a CA
+            const caRegex = /CA:\s*([A-Za-z0-9]{30,50})/i;
+            const match = message.match(caRegex);
+            if (match) {
+                const contractAddress = match[1];
+                addChatMessage(`> [AI] DETECTED CONTRACT ADDRESS: ${contractAddress.slice(0, 6)}...${contractAddress.slice(-4)}. SCANNING...`);
+                document.getElementById("contractAddress").value = contractAddress;
+                analyzeCrypto(true); // Run analysis and append to chat
+                chatInput.value = "";
+                return;
+            }
+
+            // If no CA, proceed with normal AI response
+            if (!latestAnalysis) {
+                addChatMessage("> [AI] PLEASE SCAN A COIN FIRST!");
+                chatInput.value = "";
+                return;
+            }
+
+            const response = respondToChat(message, latestAnalysis.pairInfo, latestAnalysis.data, latestAnalysis.riskScore);
+            addChatMessage(response);
+            chatInput.value = "";
+        }
+
+        document.getElementById("chat-input").addEventListener("keypress", (e) => {
+            if (e.key === "Enter") sendChatMessage();
+        });
+    </script>
+</body>
+</html>
